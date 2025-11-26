@@ -11,7 +11,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-func TestPodToPod(ctx context.Context, clientset *kubernetes.Clientset, namespace string) error {
+func TestPodToPod(ctx context.Context, clientset kubernetes.Interface, namespace string) error {
 	if namespace == "" {
 		namespace = "default"
 	}
@@ -77,7 +77,7 @@ func TestPodToPod(ctx context.Context, clientset *kubernetes.Clientset, namespac
 	return nil
 }
 
-func TestServiceConnectivity(ctx context.Context, clientset *kubernetes.Clientset, namespace string) error {
+func TestServiceConnectivity(ctx context.Context, clientset kubernetes.Interface, namespace string) error {
 	if namespace == "" {
 		namespace = "default"
 	}
