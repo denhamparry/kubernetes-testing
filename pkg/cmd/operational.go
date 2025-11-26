@@ -56,10 +56,10 @@ var operationalCmd = &cobra.Command{
 				fmt.Println("  DNS test: PASSED")
 			}
 
-			if err := networking.TestPodToPod(ctx, client.Clientset, namespace); err != nil {
-				fmt.Printf("  Pod-to-pod connectivity: FAILED - %v\n", err)
+			if err := networking.TestPodCreation(ctx, client.Clientset, namespace); err != nil {
+				fmt.Printf("  Pod creation: FAILED - %v\n", err)
 			} else {
-				fmt.Println("  Pod-to-pod connectivity: PASSED")
+				fmt.Println("  Pod creation: PASSED")
 			}
 
 			if err := networking.TestServiceConnectivity(ctx, client.Clientset, namespace); err != nil {

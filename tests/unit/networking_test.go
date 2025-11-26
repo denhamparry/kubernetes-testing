@@ -41,9 +41,9 @@ func TestNetworkingFunctions(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
-	t.Run("TestPodToPod", func(t *testing.T) {
-		err := networking.TestPodToPod(ctx, clientset, "default")
-		// Function should execute without panic
+	t.Run("TestPodCreation", func(t *testing.T) {
+		err := networking.TestPodCreation(ctx, clientset, "default")
+		// Function should execute without panic - tests pod creation, not connectivity
 		assert.NoError(t, err)
 	})
 

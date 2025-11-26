@@ -23,13 +23,16 @@ cd kubernetes-testing
 
 ### Conformance Tests
 
-Run Kubernetes conformance tests using Sonobuoy:
+> **Note:** Conformance testing integration with Sonobuoy is currently in development. The command structure exists but full Sonobuoy integration is not yet implemented. See the project roadmap for planned implementation.
+
+Run Kubernetes conformance tests using Sonobuoy (coming soon):
 
 ```bash
+# Planned - full Sonobuoy integration in development
 ./bin/ktest conformance --kubeconfig ~/.kube/config --mode quick
 ```
 
-Modes:
+Planned modes:
 
 - `quick`: Fast conformance tests (~10 minutes)
 - `certified-conformance`: Full conformance test suite (~2 hours)

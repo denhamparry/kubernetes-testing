@@ -11,7 +11,10 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-func TestPodToPod(ctx context.Context, clientset kubernetes.Interface, namespace string) error {
+// TestPodCreation tests the ability to create and delete multiple pods.
+// Note: This does NOT test actual pod-to-pod connectivity (exec/curl).
+// For real connectivity testing, see issue for implementing pod-to-pod communication tests.
+func TestPodCreation(ctx context.Context, clientset kubernetes.Interface, namespace string) error {
 	if namespace == "" {
 		namespace = "default"
 	}

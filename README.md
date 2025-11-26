@@ -4,9 +4,9 @@ A comprehensive testing framework for Kubernetes clusters, supporting conformanc
 
 ## Features
 
-- Kubernetes conformance testing (via Sonobuoy)
-- Operational testing (networking, storage, workloads)
-- Performance testing and benchmarking
+- **Kubernetes conformance testing** (Sonobuoy integration - _in development_)
+- **Operational testing** - networking, storage, workloads
+- **Performance testing** and benchmarking
 - Works with any Kubernetes cluster (kubeconfig-based)
 - Detailed reporting (HTML, JSON, console)
 - CI/CD integration ready
@@ -45,9 +45,12 @@ cd kubernetes-testing
 
 ### Conformance Tests
 
+> **Note:** Conformance testing integration with Sonobuoy is currently in development. The command structure is available but full Sonobuoy integration is not yet implemented.
+
 Validate cluster compliance with Kubernetes standards:
 
 ```bash
+# Coming soon - full Sonobuoy integration
 ./bin/ktest conformance --kubeconfig ~/.kube/config --mode quick
 ```
 
@@ -76,11 +79,13 @@ Run load tests and collect performance metrics:
 
 ## Test Categories
 
-### Conformance
+### Conformance _(In Development)_
 
-- Sonobuoy integration
-- CNCF conformance validation
-- Quick and certified modes
+> Full Sonobuoy integration is planned but not yet implemented.
+
+- Sonobuoy integration (planned)
+- CNCF conformance validation (planned)
+- Quick and certified modes (planned)
 
 ### Networking
 
