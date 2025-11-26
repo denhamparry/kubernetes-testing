@@ -7,6 +7,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -42,20 +43,30 @@ func TestDNS(ctx context.Context, clientset kubernetes.Interface, namespace stri
 
 	// Clean up pod on completion
 	defer func() {
-		_ = clientset.CoreV1().Pods(namespace).Delete(context.Background(), podName, metav1.DeleteOptions{})
+		deleteCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		if err := clientset.CoreV1().Pods(namespace).Delete(deleteCtx, podName, metav1.DeleteOptions{}); err != nil {
+			fmt.Printf("Warning: failed to cleanup pod %s: %v\n", podName, err)
+		}
 	}()
 
-	// Wait for pod to complete (simplified - production would use wait mechanism)
-	time.Sleep(10 * time.Second)
-
-	// Check pod status
-	testPod, err := clientset.CoreV1().Pods(namespace).Get(ctx, podName, metav1.GetOptions{})
+	// Wait for pod to complete using proper wait mechanism
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 60*time.Second, true,
+		func(ctx context.Context) (bool, error) {
+			pod, err := clientset.CoreV1().Pods(namespace).Get(ctx, podName, metav1.GetOptions{})
+			if err != nil {
+				return false, err
+			}
+			if pod.Status.Phase == corev1.PodSucceeded {
+				return true, nil
+			}
+			if pod.Status.Phase == corev1.PodFailed {
+				return false, fmt.Errorf("DNS test pod failed")
+			}
+			return false, nil
+		})
 	if err != nil {
-		return fmt.Errorf("failed to get DNS test pod status: %w", err)
-	}
-
-	if testPod.Status.Phase == corev1.PodFailed {
-		return fmt.Errorf("DNS test pod failed")
+		return fmt.Errorf("DNS test failed: %w", err)
 	}
 
 	return nil

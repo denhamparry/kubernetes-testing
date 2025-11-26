@@ -14,9 +14,18 @@ var performanceCmd = &cobra.Command{
 	Short: "Run performance tests",
 	Long:  `Run performance and load tests against a specified endpoint`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		duration, _ := cmd.Flags().GetDuration("duration")
-		rps, _ := cmd.Flags().GetInt("rps")
-		endpoint, _ := cmd.Flags().GetString("endpoint")
+		duration, err := cmd.Flags().GetDuration("duration")
+		if err != nil {
+			return fmt.Errorf("failed to get duration flag: %w", err)
+		}
+		rps, err := cmd.Flags().GetInt("rps")
+		if err != nil {
+			return fmt.Errorf("failed to get rps flag: %w", err)
+		}
+		endpoint, err := cmd.Flags().GetString("endpoint")
+		if err != nil {
+			return fmt.Errorf("failed to get endpoint flag: %w", err)
+		}
 
 		if endpoint == "" {
 			return fmt.Errorf("endpoint is required (use --endpoint flag)")

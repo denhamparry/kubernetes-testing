@@ -8,6 +8,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -63,20 +64,27 @@ func TestDeployment(ctx context.Context, clientset kubernetes.Interface, namespa
 
 	// Clean up deployment
 	defer func() {
-		_ = clientset.AppsV1().Deployments(namespace).Delete(context.Background(), deploymentName, metav1.DeleteOptions{})
+		deleteCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		if err := clientset.AppsV1().Deployments(namespace).Delete(deleteCtx, deploymentName, metav1.DeleteOptions{}); err != nil {
+			fmt.Printf("Warning: failed to cleanup deployment %s: %v\n", deploymentName, err)
+		}
 	}()
 
-	// Wait for deployment to be ready (simplified)
-	time.Sleep(10 * time.Second)
-
-	// Verify deployment
-	dep, err := clientset.AppsV1().Deployments(namespace).Get(ctx, deploymentName, metav1.GetOptions{})
+	// Wait for deployment to be ready using proper wait mechanism
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 60*time.Second, true,
+		func(ctx context.Context) (bool, error) {
+			dep, err := clientset.AppsV1().Deployments(namespace).Get(ctx, deploymentName, metav1.GetOptions{})
+			if err != nil {
+				return false, err
+			}
+			if dep.Status.ReadyReplicas >= 1 {
+				return true, nil
+			}
+			return false, nil
+		})
 	if err != nil {
-		return fmt.Errorf("failed to get deployment: %w", err)
-	}
-
-	if dep.Status.Replicas == 0 {
-		return fmt.Errorf("deployment has no replicas")
+		return fmt.Errorf("deployment test failed: %w", err)
 	}
 
 	return nil

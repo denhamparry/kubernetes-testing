@@ -8,6 +8,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -48,20 +49,30 @@ func TestPVCCreation(ctx context.Context, clientset kubernetes.Interface, namesp
 
 	// Clean up PVC
 	defer func() {
-		_ = clientset.CoreV1().PersistentVolumeClaims(namespace).Delete(context.Background(), pvcName, metav1.DeleteOptions{})
+		deleteCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		if err := clientset.CoreV1().PersistentVolumeClaims(namespace).Delete(deleteCtx, pvcName, metav1.DeleteOptions{}); err != nil {
+			fmt.Printf("Warning: failed to cleanup PVC %s: %v\n", pvcName, err)
+		}
 	}()
 
-	// Wait for PVC to be bound (simplified - production would use proper wait mechanism)
-	time.Sleep(5 * time.Second)
-
-	// Verify PVC status
-	createdPVC, err := clientset.CoreV1().PersistentVolumeClaims(namespace).Get(ctx, pvcName, metav1.GetOptions{})
+	// Wait for PVC to be bound using proper wait mechanism
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 60*time.Second, true,
+		func(ctx context.Context) (bool, error) {
+			pvc, err := clientset.CoreV1().PersistentVolumeClaims(namespace).Get(ctx, pvcName, metav1.GetOptions{})
+			if err != nil {
+				return false, err
+			}
+			if pvc.Status.Phase == corev1.ClaimBound {
+				return true, nil
+			}
+			if pvc.Status.Phase == corev1.ClaimLost {
+				return false, fmt.Errorf("PVC is in Lost state")
+			}
+			return false, nil
+		})
 	if err != nil {
-		return fmt.Errorf("failed to get PVC status: %w", err)
-	}
-
-	if createdPVC.Status.Phase == corev1.ClaimLost {
-		return fmt.Errorf("PVC is in Lost state")
+		return fmt.Errorf("PVC test failed: %w", err)
 	}
 
 	return nil

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"sort"
 	"time"
 )
 
@@ -97,13 +98,19 @@ func calculateLatencyPercentiles(latencies []time.Duration) (avg, p95, p99 time.
 		return 0, 0, 0
 	}
 
+	// Sort latencies for correct percentile calculation
+	sort.Slice(latencies, func(i, j int) bool {
+		return latencies[i] < latencies[j]
+	})
+
+	// Calculate average
 	var sum time.Duration
 	for _, l := range latencies {
 		sum += l
 	}
 	avg = sum / time.Duration(len(latencies))
 
-	// Simplified percentile calculation
+	// Calculate percentiles from sorted array
 	p95Index := int(float64(len(latencies)) * 0.95)
 	p99Index := int(float64(len(latencies)) * 0.99)
 

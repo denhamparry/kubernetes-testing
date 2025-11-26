@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/denhamparry/kubernetes-testing/pkg/kubeconfig"
 	"github.com/denhamparry/kubernetes-testing/pkg/networking"
@@ -16,9 +17,18 @@ var operationalCmd = &cobra.Command{
 	Short: "Run operational tests",
 	Long:  `Run operational tests for networking, storage, and workloads`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		kubeconfigPath, _ := cmd.Flags().GetString("kubeconfig")
-		tests, _ := cmd.Flags().GetStringSlice("tests")
-		namespace, _ := cmd.Flags().GetString("namespace")
+		kubeconfigPath, err := cmd.Flags().GetString("kubeconfig")
+		if err != nil {
+			return fmt.Errorf("failed to get kubeconfig flag: %w", err)
+		}
+		tests, err := cmd.Flags().GetStringSlice("tests")
+		if err != nil {
+			return fmt.Errorf("failed to get tests flag: %w", err)
+		}
+		namespace, err := cmd.Flags().GetString("namespace")
+		if err != nil {
+			return fmt.Errorf("failed to get namespace flag: %w", err)
+		}
 
 		fmt.Println("Running operational tests...")
 
@@ -28,7 +38,8 @@ var operationalCmd = &cobra.Command{
 			return fmt.Errorf("failed to create kubernetes client: %w", err)
 		}
 
-		ctx := context.Background()
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+		defer cancel()
 
 		// Determine which tests to run
 		runAll := contains(tests, "all")
