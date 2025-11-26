@@ -74,7 +74,7 @@ The Kubernetes testing framework is designed as a modular, extensible tool for t
 
 **Packages**:
 
-- `conformance/`: Sonobuoy integration for conformance testing
+- `conformance/`: Sonobuoy integration for conformance testing _(in development)_
 - `networking/`: DNS, connectivity, service tests
 - `storage/`: PVC, storage class tests
 - `workload/`: Deployment, StatefulSet, DaemonSet tests
@@ -102,15 +102,17 @@ type Client struct {
 
 ## Test Flow
 
-### Conformance Test Flow
+### Conformance Test Flow _(Planned - In Development)_
+
+> **Note:** Full Sonobuoy integration is not yet implemented. The flow below describes the planned architecture.
 
 1. User executes `ktest conformance`
 2. CLI parses flags (mode, kubeconfig)
 3. Kubeconfig is loaded, clientset created
-4. Sonobuoy client initialized
-5. Conformance tests deployed to cluster
-6. Results retrieved and formatted
-7. Report generated
+4. Sonobuoy client initialized (planned)
+5. Conformance tests deployed to cluster (planned)
+6. Results retrieved and formatted (planned)
+7. Report generated (planned)
 
 ### Operational Test Flow
 

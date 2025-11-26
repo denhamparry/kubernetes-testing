@@ -17,7 +17,12 @@ func TestPVCCreation(ctx context.Context, clientset kubernetes.Interface, namesp
 		namespace = "default"
 	}
 	if storageClass == "" {
-		storageClass = "standard"
+		// Auto-detect default storage class instead of hardcoding "standard"
+		defaultSC, err := getDefaultStorageClass(ctx, clientset)
+		if err != nil {
+			return fmt.Errorf("failed to detect default storage class: %w", err)
+		}
+		storageClass = defaultSC
 	}
 
 	timestamp := time.Now().Unix()
@@ -103,4 +108,26 @@ func TestStorageClass(ctx context.Context, clientset kubernetes.Interface) error
 	}
 
 	return nil
+}
+
+// getDefaultStorageClass finds and returns the name of the default storage class in the cluster.
+func getDefaultStorageClass(ctx context.Context, clientset kubernetes.Interface) (string, error) {
+	storageClasses, err := clientset.StorageV1().StorageClasses().List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return "", fmt.Errorf("failed to list storage classes: %w", err)
+	}
+
+	if len(storageClasses.Items) == 0 {
+		return "", fmt.Errorf("no storage classes found in cluster")
+	}
+
+	// Look for default storage class
+	for _, sc := range storageClasses.Items {
+		if sc.Annotations["storageclass.kubernetes.io/is-default-class"] == "true" {
+			return sc.Name, nil
+		}
+	}
+
+	// If no default found, return error instead of assuming
+	return "", fmt.Errorf("no default storage class found (consider setting --storage-class flag)")
 }
