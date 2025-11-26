@@ -64,7 +64,7 @@ func TestStatefulSet(ctx context.Context, clientset kubernetes.Interface, namesp
 
 	// Clean up statefulset
 	defer func() {
-		clientset.AppsV1().StatefulSets(namespace).Delete(context.Background(), statefulSetName, metav1.DeleteOptions{})
+		_ = clientset.AppsV1().StatefulSets(namespace).Delete(context.Background(), statefulSetName, metav1.DeleteOptions{})
 	}()
 
 	// Wait for statefulset to be ready (simplified)

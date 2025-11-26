@@ -64,14 +64,14 @@ func TestPodToPod(ctx context.Context, clientset kubernetes.Interface, namespace
 
 	_, err = clientset.CoreV1().Pods(namespace).Create(ctx, clientPod, metav1.CreateOptions{})
 	if err != nil {
-		clientset.CoreV1().Pods(namespace).Delete(ctx, serverPodName, metav1.DeleteOptions{})
+		_ = clientset.CoreV1().Pods(namespace).Delete(ctx, serverPodName, metav1.DeleteOptions{})
 		return fmt.Errorf("failed to create client pod: %w", err)
 	}
 
 	// Clean up pods
 	defer func() {
-		clientset.CoreV1().Pods(namespace).Delete(context.Background(), serverPodName, metav1.DeleteOptions{})
-		clientset.CoreV1().Pods(namespace).Delete(context.Background(), clientPodName, metav1.DeleteOptions{})
+		_ = clientset.CoreV1().Pods(namespace).Delete(context.Background(), serverPodName, metav1.DeleteOptions{})
+		_ = clientset.CoreV1().Pods(namespace).Delete(context.Background(), clientPodName, metav1.DeleteOptions{})
 	}()
 
 	return nil
@@ -109,7 +109,7 @@ func TestServiceConnectivity(ctx context.Context, clientset kubernetes.Interface
 
 	// Clean up service
 	defer func() {
-		clientset.CoreV1().Services(namespace).Delete(context.Background(), serviceName, metav1.DeleteOptions{})
+		_ = clientset.CoreV1().Services(namespace).Delete(context.Background(), serviceName, metav1.DeleteOptions{})
 	}()
 
 	// Verify service was created
