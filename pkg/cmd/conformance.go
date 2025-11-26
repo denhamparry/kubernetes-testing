@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/denhamparry/kubernetes-testing/pkg/conformance"
 	"github.com/denhamparry/kubernetes-testing/pkg/kubeconfig"
@@ -14,8 +15,14 @@ var conformanceCmd = &cobra.Command{
 	Short: "Run Kubernetes conformance tests",
 	Long:  `Run Kubernetes conformance tests using Sonobuoy to validate cluster compliance`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		kubeconfigPath, _ := cmd.Flags().GetString("kubeconfig")
-		mode, _ := cmd.Flags().GetString("mode")
+		kubeconfigPath, err := cmd.Flags().GetString("kubeconfig")
+		if err != nil {
+			return fmt.Errorf("failed to get kubeconfig flag: %w", err)
+		}
+		mode, err := cmd.Flags().GetString("mode")
+		if err != nil {
+			return fmt.Errorf("failed to get mode flag: %w", err)
+		}
 
 		fmt.Printf("Running conformance tests in %s mode...\n", mode)
 
@@ -32,7 +39,8 @@ var conformanceCmd = &cobra.Command{
 		}
 
 		// Run conformance test
-		ctx := context.Background()
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
+		defer cancel()
 		if err := test.Run(ctx, mode); err != nil {
 			return fmt.Errorf("conformance test failed: %w", err)
 		}

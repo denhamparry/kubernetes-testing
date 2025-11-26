@@ -70,8 +70,14 @@ func TestPodToPod(ctx context.Context, clientset kubernetes.Interface, namespace
 
 	// Clean up pods
 	defer func() {
-		_ = clientset.CoreV1().Pods(namespace).Delete(context.Background(), serverPodName, metav1.DeleteOptions{})
-		_ = clientset.CoreV1().Pods(namespace).Delete(context.Background(), clientPodName, metav1.DeleteOptions{})
+		deleteCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		if err := clientset.CoreV1().Pods(namespace).Delete(deleteCtx, serverPodName, metav1.DeleteOptions{}); err != nil {
+			fmt.Printf("Warning: failed to cleanup pod %s: %v\n", serverPodName, err)
+		}
+		if err := clientset.CoreV1().Pods(namespace).Delete(deleteCtx, clientPodName, metav1.DeleteOptions{}); err != nil {
+			fmt.Printf("Warning: failed to cleanup pod %s: %v\n", clientPodName, err)
+		}
 	}()
 
 	return nil
@@ -109,7 +115,11 @@ func TestServiceConnectivity(ctx context.Context, clientset kubernetes.Interface
 
 	// Clean up service
 	defer func() {
-		_ = clientset.CoreV1().Services(namespace).Delete(context.Background(), serviceName, metav1.DeleteOptions{})
+		deleteCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		if err := clientset.CoreV1().Services(namespace).Delete(deleteCtx, serviceName, metav1.DeleteOptions{}); err != nil {
+			fmt.Printf("Warning: failed to cleanup service %s: %v\n", serviceName, err)
+		}
 	}()
 
 	// Verify service was created

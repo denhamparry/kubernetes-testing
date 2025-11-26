@@ -8,6 +8,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -64,20 +65,27 @@ func TestStatefulSet(ctx context.Context, clientset kubernetes.Interface, namesp
 
 	// Clean up statefulset
 	defer func() {
-		_ = clientset.AppsV1().StatefulSets(namespace).Delete(context.Background(), statefulSetName, metav1.DeleteOptions{})
+		deleteCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		if err := clientset.AppsV1().StatefulSets(namespace).Delete(deleteCtx, statefulSetName, metav1.DeleteOptions{}); err != nil {
+			fmt.Printf("Warning: failed to cleanup statefulset %s: %v\n", statefulSetName, err)
+		}
 	}()
 
-	// Wait for statefulset to be ready (simplified)
-	time.Sleep(10 * time.Second)
-
-	// Verify statefulset
-	sts, err := clientset.AppsV1().StatefulSets(namespace).Get(ctx, statefulSetName, metav1.GetOptions{})
+	// Wait for statefulset to be ready using proper wait mechanism
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 60*time.Second, true,
+		func(ctx context.Context) (bool, error) {
+			sts, err := clientset.AppsV1().StatefulSets(namespace).Get(ctx, statefulSetName, metav1.GetOptions{})
+			if err != nil {
+				return false, err
+			}
+			if sts.Status.ReadyReplicas >= 1 {
+				return true, nil
+			}
+			return false, nil
+		})
 	if err != nil {
-		return fmt.Errorf("failed to get statefulset: %w", err)
-	}
-
-	if sts.Status.Replicas == 0 {
-		return fmt.Errorf("statefulset has no replicas")
+		return fmt.Errorf("statefulset test failed: %w", err)
 	}
 
 	return nil
