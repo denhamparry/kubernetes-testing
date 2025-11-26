@@ -1,0 +1,13 @@
+tests:
+  - name: dns-resolution
+    enabled: true
+    timeout: 60s
+    description: Test DNS resolution for kubernetes.default and external DNS
+  - name: pod-to-pod
+    enabled: true
+    timeout: 120s
+    description: Test connectivity between pods
+  - name: service-connectivity
+    enabled: true
+    timeout: 120s
+    description: Test service endpoint access

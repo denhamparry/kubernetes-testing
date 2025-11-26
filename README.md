@@ -1,139 +1,217 @@
-# Claude Code Project Template
+# Kubernetes Testing Framework
 
-A GitHub template repository that provides a standardized, fully-configured foundation for new projects developed with Claude Code. Includes built-in support for Test-Driven Development (TDD), automated code quality checks, and AI-assisted workflows.
+A comprehensive testing framework for Kubernetes clusters, supporting conformance testing, operational validation, and performance testing.
 
-## 🚀 Quick Start
+## Features
 
-### 1. Create Your Project
+- Kubernetes conformance testing (via Sonobuoy)
+- Operational testing (networking, storage, workloads)
+- Performance testing and benchmarking
+- Works with any Kubernetes cluster (kubeconfig-based)
+- Detailed reporting (HTML, JSON, console)
+- CI/CD integration ready
 
-Click the **"Use this template"** button above to create a new repository from this template.
-
-### 2. Clone and Setup
+## Quick Start
 
 ```bash
-# Clone your new repository
-git clone https://github.com/your-username/your-new-project.git
-cd your-new-project
+# Setup
+./scripts/setup.sh
 
-# Open Claude Code
-claude
+# Run all tests
+./scripts/run-tests.sh all
+
+# Run specific test suite
+./bin/ktest conformance --kubeconfig ~/.kube/config
 ```
 
-### 3. Run the Setup Wizard
+## Installation
 
-In Claude Code, run:
+### Prerequisites
+
+- Go 1.21+
+- kubectl
+- Access to a Kubernetes cluster
+- Valid kubeconfig file
+
+### Build from Source
+
+```bash
+git clone https://github.com/denhamparry/kubernetes-testing.git
+cd kubernetes-testing
+./scripts/setup.sh
+```
+
+## Usage
+
+### Conformance Tests
+
+Validate cluster compliance with Kubernetes standards:
+
+```bash
+./bin/ktest conformance --kubeconfig ~/.kube/config --mode quick
+```
+
+### Operational Tests
+
+Test networking, storage, and workloads:
+
+```bash
+# All operational tests
+./bin/ktest operational --kubeconfig ~/.kube/config
+
+# Specific test categories
+./bin/ktest operational --tests networking,storage
+```
+
+### Performance Tests
+
+Run load tests and collect performance metrics:
+
+```bash
+./bin/ktest performance \
+  --endpoint http://my-app.example.com \
+  --duration 5m \
+  --rps 100
+```
+
+## Test Categories
+
+### Conformance
+
+- Sonobuoy integration
+- CNCF conformance validation
+- Quick and certified modes
+
+### Networking
+
+- DNS resolution
+- Pod-to-pod connectivity
+- Service endpoint access
+
+### Storage
+
+- PVC creation and binding
+- Storage class validation
+- Dynamic provisioning
+
+### Workloads
+
+- Deployment creation and scaling
+- StatefulSet ordered deployment
+- DaemonSet node coverage
+
+### Performance
+
+- HTTP load testing
+- Latency metrics (avg, p95, p99)
+- Throughput analysis
+- Error rate tracking
+
+## Configuration
+
+Tests can be customized via YAML files in `configs/tests/`:
+
+- `networking.yaml` - Network test parameters
+- `storage.yaml` - Storage test configuration
+- `workload.yaml` - Workload test settings
+- `sonobuoy/quick-config.yaml` - Conformance test config
+
+## Documentation
+
+- [Usage Guide](docs/usage.md) - Detailed usage instructions
+- [Architecture](docs/architecture.md) - System design and components
+- [Contributing](CONTRIBUTING.md) - How to contribute
+
+## CI/CD Integration
+
+The project includes GitHub Actions workflows:
+
+- Lint (golangci-lint)
+- Unit tests with coverage
+- Build verification
+- Integration tests with kind
+
+### Example Pipeline Integration
+
+```yaml
+- name: Run Kubernetes tests
+  run: |
+    ./scripts/setup.sh
+    ./bin/ktest operational --kubeconfig $KUBECONFIG
+```
+
+## Development
+
+### Running Tests
+
+```bash
+# Unit tests
+go test -v ./...
+
+# Integration tests (requires cluster)
+go test -v -tags=integration ./tests/integration/...
+
+# With coverage
+go test -v -race -coverprofile=coverage.txt ./...
+```
+
+### Building
+
+```bash
+# Build CLI
+go build -o bin/ktest cmd/ktest/main.go
+
+# Run locally
+./bin/ktest --help
+```
+
+## Project Structure
 
 ```text
-/setup-repo
+kubernetes-testing/
+├── cmd/ktest/          # CLI entry point
+├── pkg/                # Core packages
+│   ├── cmd/           # CLI commands
+│   ├── conformance/   # Sonobuoy integration
+│   ├── networking/    # Network tests
+│   ├── storage/       # Storage tests
+│   ├── workload/      # Workload tests
+│   ├── performance/   # Performance tests
+│   ├── kubeconfig/    # Kubeconfig handling
+│   └── report/        # Report generation
+├── tests/             # Test files
+│   ├── unit/         # Unit tests
+│   └── integration/  # Integration tests
+├── configs/           # Configuration files
+│   ├── tests/        # Test configs
+│   └── sonobuoy/     # Sonobuoy configs
+├── scripts/           # Helper scripts
+└── docs/             # Documentation
 ```
 
-The interactive wizard will:
+## Contributing
 
-- ✅ Gather your project information (name, tech stack, commands)
-- ✅ Customize configuration files for your specific project
-- ✅ Configure pre-commit hooks for your language
-- ✅ Set up automated GitHub PR reviews
-- ✅ Install and verify all configurations
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-### 4. Start Building
-
-```bash
-# Commit the configured files
-git add .
-git commit -m "chore: configure Claude Code for project"
-
-# Start developing with TDD!
-```
-
-## 📦 What's Included
-
-### Core Configuration
-
-- **`CLAUDE.md`** - Project context for Claude Code with TDD guidelines
-- **`docs/setup.md`** - Comprehensive setup checklist and best practices
-- **`.pre-commit-config.yaml`** - Code quality hooks (formatting, linting, security)
-- **`.github/claude-code-review.yml`** - Automated PR review configuration
-
-### Custom Slash Commands
-
-Located in `.claude/commands/`:
-
-- **`/setup-repo`** - Interactive setup wizard (run this first!)
-- **`/review`** - Comprehensive code review (quality, tests, security, performance)
-- **`/tdd-check`** - Verify TDD workflow compliance
-- **`/precommit`** - Run pre-commit hooks on all files
-
-## 🎯 Key Features
-
-### Test-Driven Development (TDD)
-
-This template enforces TDD workflow:
-
-1. **Red** - Write a failing test first
-2. **Green** - Write minimal code to make it pass
-3. **Refactor** - Improve code while keeping tests green
-
-Use `/tdd-check` to verify you're following TDD principles.
-
-### Automated Code Quality
-
-- Pre-commit hooks for consistent formatting and linting
-- Secret detection to prevent credential leaks
-- Language-specific quality checks (Python, Go, JavaScript/TypeScript)
-- Automated PR reviews with Claude Code
-
-### Claude Code Optimized
-
-- Project-specific context in CLAUDE.md
-- Custom slash commands for common workflows
-- Automated PR reviews configured out of the box
-- Best practices built into the template
-
-## 🛠️ Supported Languages
-
-The template is language-agnostic but includes pre-configured hooks for:
-
-- **Python** - Black, Flake8, isort
-- **Go** - gofmt, go vet, go imports
-- **JavaScript/TypeScript** - Prettier, ESLint
-- **Generic** - File formatting, YAML/JSON validation, secret detection
-
-Simply uncomment the relevant hooks in `.pre-commit-config.yaml` during setup.
-
-## 📚 Documentation
-
-- **`CLAUDE.md`** - Main project context for Claude Code
-- **`docs/setup.md`** - Detailed setup instructions and best practices
-- **`.claude/commands/`** - Custom command documentation
-
-## 🔧 Manual Setup (Alternative)
-
-If you prefer not to use the interactive wizard, follow the manual checklist in `docs/setup.md`.
-
-## 🤝 Contributing to the Template
-
-To improve this template:
-
-1. Make your changes
-2. Test with a new project
-3. Update documentation
-4. Submit a PR
-
-## 📝 License
+## License
 
 [Add your license here]
 
-## 🙋 Support
+## Support
 
-For issues with:
+For issues and questions:
 
-- **This template**: Open an issue in this repository
-- **Claude Code**: Visit <https://docs.claude.com/en/docs/claude-code>
-- **Feedback**: <https://github.com/anthropics/claude-code/issues>
+- Open an issue: <https://github.com/denhamparry/kubernetes-testing/issues>
+- Documentation: See `docs/` directory
+- Claude Code: <https://docs.claude.com/en/docs/claude-code>
+
+## Acknowledgments
+
+- Built with [Kubernetes client-go](https://github.com/kubernetes/client-go)
+- Conformance testing via [Sonobuoy](https://sonobuoy.io/)
+- CLI framework: [Cobra](https://github.com/spf13/cobra)
 
 ---
 
-**Template Version:** 1.0
-**Last Updated:** 2025-10-02
-
-Built with ❤️ for Claude Code development
+**Version:** 1.0.0
+**Status:** Active Development

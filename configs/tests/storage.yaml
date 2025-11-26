@@ -1,0 +1,9 @@
+tests:
+  - name: pvc-creation
+    enabled: true
+    storageClass: standard
+    size: 1Gi
+    description: Test PVC creation and binding
+  - name: dynamic-provisioning
+    enabled: true
+    description: Test dynamic volume provisioning

@@ -1,0 +1,6 @@
+sonobuoy-config:
+  driver: Job
+  plugin-name: e2e
+  result-format: junit
+  mode: quick
+  wait-timeout: 60m
