@@ -48,7 +48,7 @@ func TestPVCCreation(ctx context.Context, clientset kubernetes.Interface, namesp
 
 	// Clean up PVC
 	defer func() {
-		clientset.CoreV1().PersistentVolumeClaims(namespace).Delete(context.Background(), pvcName, metav1.DeleteOptions{})
+		_ = clientset.CoreV1().PersistentVolumeClaims(namespace).Delete(context.Background(), pvcName, metav1.DeleteOptions{})
 	}()
 
 	// Wait for PVC to be bound (simplified - production would use proper wait mechanism)

@@ -42,7 +42,7 @@ func TestDNS(ctx context.Context, clientset kubernetes.Interface, namespace stri
 
 	// Clean up pod on completion
 	defer func() {
-		clientset.CoreV1().Pods(namespace).Delete(context.Background(), podName, metav1.DeleteOptions{})
+		_ = clientset.CoreV1().Pods(namespace).Delete(context.Background(), podName, metav1.DeleteOptions{})
 	}()
 
 	// Wait for pod to complete (simplified - production would use wait mechanism)

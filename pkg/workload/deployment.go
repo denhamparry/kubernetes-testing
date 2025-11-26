@@ -63,7 +63,7 @@ func TestDeployment(ctx context.Context, clientset kubernetes.Interface, namespa
 
 	// Clean up deployment
 	defer func() {
-		clientset.AppsV1().Deployments(namespace).Delete(context.Background(), deploymentName, metav1.DeleteOptions{})
+		_ = clientset.AppsV1().Deployments(namespace).Delete(context.Background(), deploymentName, metav1.DeleteOptions{})
 	}()
 
 	// Wait for deployment to be ready (simplified)
