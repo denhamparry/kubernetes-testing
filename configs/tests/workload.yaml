@@ -1,0 +1,12 @@
+tests:
+  - name: deployment
+    enabled: true
+    replicas: 3
+    description: Test deployment creation, scaling, and updates
+  - name: statefulset
+    enabled: true
+    replicas: 3
+    description: Test statefulset creation and ordered deployment
+  - name: daemonset
+    enabled: true
+    description: Test daemonset creation and node coverage

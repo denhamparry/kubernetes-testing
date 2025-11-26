@@ -1,8 +1,8 @@
-# Project: GitHub Template for Claude Code Projects
+# Project: Kubernetes Testing Framework
 
 ## Repository Purpose
 
-This is a **GitHub template repository** designed to provide a standardized foundation for new projects that will be developed with Claude Code. It includes setup documentation and best practices for TDD-driven development with AI assistance.
+This is a **Kubernetes testing framework** that provides comprehensive testing capabilities for Kubernetes clusters including conformance testing, operational validation, and performance testing.
 
 ## Using This Template
 
@@ -83,16 +83,29 @@ When creating a new project from this template:
 - [ ] Install and configure pre-commit: `pip install pre-commit && pre-commit install`
 - [ ] Set up GitHub App for PR reviews: run `/install-github-app` in Claude Code
 
-## Quick Commands (Template Defaults)
-
-Replace this section with your actual commands:
+## Quick Commands
 
 ```bash
-# Build: [Add your build command]
-# Test: [Add your test command]
-# Lint: [Add your lint command]
-# Type Check: [Add your typecheck command]
-# Dev Server: [Add your dev command]
+# Setup
+./scripts/setup.sh
+
+# Build
+go build -o bin/ktest cmd/ktest/main.go
+
+# Test
+go test -v ./...
+
+# Lint
+golangci-lint run
+
+# Run conformance tests
+./bin/ktest conformance --kubeconfig ~/.kube/config
+
+# Run operational tests
+./bin/ktest operational --kubeconfig ~/.kube/config
+
+# Run performance tests
+./bin/ktest performance --endpoint http://example.com
 ```
 
 ## Code Style Guidelines (Customize)
