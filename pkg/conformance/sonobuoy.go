@@ -9,7 +9,7 @@ import (
 )
 
 type ConformanceTest struct {
-	clientset *kubernetes.Clientset
+	clientset kubernetes.Interface
 }
 
 type Results struct {
@@ -20,7 +20,7 @@ type Results struct {
 	Details  string
 }
 
-func NewConformanceTest(clientset *kubernetes.Clientset) (*ConformanceTest, error) {
+func NewConformanceTest(clientset kubernetes.Interface) (*ConformanceTest, error) {
 	if clientset == nil {
 		return nil, fmt.Errorf("clientset cannot be nil")
 	}

@@ -15,11 +15,11 @@ func TestNetworkingFunctions(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("TestDNS", func(t *testing.T) {
-		// This would fail without a real cluster, but tests the function signature
+		// With fake clientset, the function should execute without panic
+		// Testing function signature and basic logic
 		err := networking.TestDNS(ctx, clientset, "default")
-		// In a unit test with mock clientset, we expect this might fail
-		// but we're testing that the function exists and has correct signature
-		assert.NotNil(t, err)
+		// Fake clientset allows pod creation to succeed
+		assert.NoError(t, err)
 	})
 
 	t.Run("TestPodToPod", func(t *testing.T) {

@@ -10,7 +10,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-func TestDNS(ctx context.Context, clientset *kubernetes.Clientset, namespace string) error {
+func TestDNS(ctx context.Context, clientset kubernetes.Interface, namespace string) error {
 	if namespace == "" {
 		namespace = "default"
 	}

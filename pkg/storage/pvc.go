@@ -11,7 +11,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-func TestPVCCreation(ctx context.Context, clientset *kubernetes.Clientset, namespace, storageClass string) error {
+func TestPVCCreation(ctx context.Context, clientset kubernetes.Interface, namespace, storageClass string) error {
 	if namespace == "" {
 		namespace = "default"
 	}
@@ -67,7 +67,7 @@ func TestPVCCreation(ctx context.Context, clientset *kubernetes.Clientset, names
 	return nil
 }
 
-func TestStorageClass(ctx context.Context, clientset *kubernetes.Clientset) error {
+func TestStorageClass(ctx context.Context, clientset kubernetes.Interface) error {
 	// List available storage classes
 	storageClasses, err := clientset.StorageV1().StorageClasses().List(ctx, metav1.ListOptions{})
 	if err != nil {
